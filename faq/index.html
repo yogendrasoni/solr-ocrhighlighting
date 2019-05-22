@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Frequently Asked Questions - Solr OCR Highlighting Plugin</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Frequently Asked Questions";
+    var mkdocs_page_input_path = "faq.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Solr OCR Highlighting Plugin</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../getting_started/">Getting Started</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../formats/">OCR Formats</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../external_storage/">External Storage</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../example/">Example Setup</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../queryparams/">Query Parameters</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">Frequently Asked Questions</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#partial-docs">Can I have a document that points to a part of an OCR document on external storage?</a></li>
+    
+
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Solr OCR Highlighting Plugin</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Frequently Asked Questions</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/dbmdz/solr-ocrhighlighting/edit/master/docs/faq.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h2 id="partial-docs">Can I have a document that points to a part of an OCR document on external storage?</h2>
+<p><strong>Yes, with an ugly hack</strong>. This use case appears e.g. when indexing digital newspapers,
+where you have a single large volume on disk (e.g. the OCR text for the bound volume containing all issues from the
+year 1878) but you want your Solr documents to be more fine-grained (e.g. on the issue or even article level).
+A problem in Solr is that the source of the offsets that are used for highlighting are always relative to the actual
+document that was used for indexing and cannot be easily customized. To work around this:<br/>
+<strong>Replace all of the content preceding your sub-section with a single XML comment tag that is exactly as long as the
+old content and discard all content that follows after the sub-section</strong> (We told you the solution was hacky, didn&rsquo;t
+we?). This will lead the analyzer chain to discard all of the undesired content, while still storing the correct offsets
+for the sub-section content in the index.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Since the plugin doesn&rsquo;t do any actual XML parsing, the masked documents don&rsquo;t have to be valid XML.</p>
+</div>
+<p>Minimal example before masking:</p>
+<pre><code class="xml">&lt;l&gt;Some content that you don't want in your Solr document&lt;/l&gt;
+&lt;l&gt;Here's the content you want in the index for this document&lt;/l&gt;
+&lt;l&gt;And here's some extra content following it that you don't want&lt;/l&gt;
+</code></pre>
+
+<p>Minimal example after masking:</p>
+<pre><code class="xml">&lt;!----------------------------------------------------------&gt;
+&lt;l&gt;Here's the content you want in the index for this document&lt;/l&gt;
+</code></pre>
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This technique is also very useful if you want to exclude certain parts of the OCR document from the index.
+It can be very helpful to filter out header and footer lines or page numbers from the search index, e.g. to
+properly support search hits that cross page boundaries.</p>
+</div>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../queryparams/" class="btn btn-neutral" title="Query Parameters"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/dbmdz/solr-ocrhighlighting/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../queryparams/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+
+</body>
+</html>

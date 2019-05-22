@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Getting Started - Solr OCR Highlighting Plugin</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Getting Started";
+    var mkdocs_page_input_path = "getting_started.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Solr OCR Highlighting Plugin</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">Getting Started</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#requirements">Requirements</a></li>
+    
+
+    <li class="toctree-l2"><a href="#installation">Installation</a></li>
+    
+
+    <li class="toctree-l2"><a href="#compiling">Compiling</a></li>
+    
+
+    <li class="toctree-l2"><a href="#configuration">Configuration</a></li>
+    
+
+    <li class="toctree-l2"><a href="#indexing">Indexing</a></li>
+    
+
+    <li class="toctree-l2"><a href="#querying">Querying</a></li>
+    
+
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../formats/">OCR Formats</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../external_storage/">External Storage</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../example/">Example Setup</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../queryparams/">Query Parameters</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../faq/">Frequently Asked Questions</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Solr OCR Highlighting Plugin</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Getting Started</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/dbmdz/solr-ocrhighlighting/edit/master/docs/getting_started.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h2 id="requirements">Requirements</h2>
+<ul>
+<li>Some familiarity with configuring Solr</li>
+<li>Solr &gt;= 7.x</li>
+<li>OCR documents need to be in <a href="../formats/#hocr">hOCR</a>, <a href="../formats/#alto">ALTO</a>
+  or <a href="../formats/#miniocr">MiniOCR</a> formats, with at least page-, and word-level
+  segmentation</li>
+<li>One OCR file needs to correspond to one document in the search index<br>
+  There is a <a href="../faq/#partial-docs">hack to support multiple index documents per file</a>,
+  but the reverse (multiple files per index document) is not possible,
+  you will have to merge the files.</li>
+</ul>
+<h2 id="installation">Installation</h2>
+<p>Download the JAR for the latest release from the <a href="https://github.com/dbmdz/solr-ocrhighlighting/releases">GitHub Releases
+website</a> and drop it
+into your core&rsquo;s <code>lib</code> directory.</p>
+<h2 id="compiling">Compiling</h2>
+<p>If you want to use the latest bleeding-edge version, you can also compile the plugin yourself.
+For this you will need at least Java 8 and Maven:</p>
+<pre><code class="sh">$ mvn package
+</code></pre>
+
+<p>The JAR will be in <code>target/solr-ocrhighlighting-$version.jar</code>.</p>
+<h2 id="configuration">Configuration</h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you&rsquo;re using a format other than hOCR, refer to the <a href="../formats/">OCR Formats</a>
+documentation for the values you need to put into your configuration and schema.</p>
+</div>
+<p>Using the plugin requires some configuration in your <code>solrconfig.xml</code>. For one,
+you have to define a search component to add the OCR highlighting information
+for your format to the response. Also, you will have to specify which of
+your fields contain OCR text (i.e. the <code>solrconfig</code> is currently tied to the schema):</p>
+<pre><code class="xml">&lt;config&gt;
+  &lt;searchComponent class=&quot;org.mdz.search.solrocr.solr.HighlightComponent&quot; name=&quot;ocrHighlight&quot;
+                   ocrFormat=&quot;org.mdz.search.solrocr.formats.hocr.HocrFormat&quot;&gt;
+    &lt;lst name=&quot;ocrFields&quot;&gt;
+      &lt;!-- Requires a field named `ocr_text` in the schema --&gt;
+      &lt;str&gt;ocr_text&lt;/str&gt;
+    &lt;/lst&gt;
+  &lt;/searchComponent&gt;
+
+  &lt;!-- Add the OCR highlighting component to the components on your request handler(s) --&gt;
+  &lt;requestHandler name=&quot;/select&quot; class=&quot;solr.SearchHandler&quot;&gt;
+    &lt;arr name=&quot;components&quot;&gt;
+      &lt;str&gt;query&lt;/str&gt;
+      &lt;str&gt;highlight&lt;/str&gt;
+      &lt;!-- This value needs to be equal to the `name` attribute on the searchComponent --&gt;
+      &lt;str&gt;ocrHighlight&lt;/str&gt; 
+    &lt;/arr&gt;
+  &lt;/requestHandler&gt;
+&lt;/config&gt;
+</code></pre>
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For this simple guide, the configuration will <strong>store the OCR documents in
+the Solr index itself</strong>. If you want to store them outside of the index on
+the file system, refer to the <a href="../external_storage/">External Storage documentation</a>.</p>
+</div>
+<p>For your schema, you will have to define a type that enables the storage of
+offsets and positions. Enabling term vectors is optional, although it
+significantly speeds up highlights wildcard queries. The indexing analyzer chain for
+the field type needs to start with the <code>HTMLStripCharFilterFactory</code>. For ALTO,
+you need the specialized <code>org.mdz.search.solrocr.formats.alto.AltoCharFilterFactory</code> instead.</p>
+<pre><code class="xml">&lt;fieldtype name=&quot;text_ocr&quot; class=&quot;solr.TextField&quot; storeOffsetsWithPositions=&quot;true&quot; termVectors=&quot;true&quot;&gt;
+  &lt;analyzer&gt;
+    &lt;!-- Strip away the XML/HTML tags to arrive at a plaintext version of the OCR --&gt;
+    &lt;charFilter class=&quot;solr.HTMLStripCharFilterFactory&quot; /&gt;
+    &lt;!-- rest of your analyzer chain --&gt;
+    &lt;!-- ..... --&gt;
+  &lt;/analyzer&gt;
+&lt;/fieldtype&gt;
+</code></pre>
+
+<p>You can then use this new field type in your schema:</p>
+<pre><code class="xml">  &lt;fields&gt;
+    &lt;field name=&quot;id&quot; type=&quot;string&quot; multiValued=&quot;false&quot; indexed=&quot;true&quot; stored=&quot;true&quot; required=&quot;true&quot;/&gt;
+    &lt;field name=&quot;ocr_text&quot; type=&quot;text_ocr&quot; indexed=&quot;true&quot; stored=&quot;true&quot; /&gt;
+  &lt;/fields&gt;
+</code></pre>
+
+<p>After you&rsquo;ve saved your configuration and schema and restarted Solr, you can
+verify that the plugin is activated by checking the <em>Plugins / Stats</em> section in the
+Solr admin interface for your core. There should now be a Highlighting plugin
+with the <code>name</code> you chose:</p>
+<p><img alt="" src="../img/config-plugin-enabled.png" /></p>
+<h2 id="indexing">Indexing</h2>
+<p>Indexing for most usage scenarios (except for <a href="../external_storage/#utf8">externally stored UTF8
+files</a>) is simple: Just POST the document with
+appropriately  escaped OCR in the corresponding field.</p>
+<p>A simple example using curl and <a href="https://stedolan.github.io/jq/">jq</a> for escaping:</p>
+<pre><code>$ curl -H &quot;Content-Type: application/json&quot; \
+       -d '{&quot;id&quot;: &quot;document_id&quot;, &quot;ocr_field&quot;: $(cat ocrdocument.xml |jq -Rs)}'
+</code></pre>
+
+<p><strong>That&rsquo;s it!</strong> Assuming Solr is correctly configured, you should now have a
+document that can be highlighted in your index.</p>
+<h2 id="querying">Querying</h2>
+<p>At query time, no extra parameters besides <code>hl=true</code> and an inclusion of your OCR fields in the
+<code>hl.fields</code> parameter are required.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For a list of all available parameters, rever to the <a href="../queryparams/">Query Parameters documentation</a></p>
+</div>
+<p>Given an index with the fields <code>id</code>, <code>title</code> and <code>ocr_text</code>, and a query like the following:</p>
+<pre><code class="http">GET http://localhost:8983/solr/ocrtest/select?fl=id,title&amp;hl=on&amp;hl.fl=ocr_text&amp;df=ocr_text&amp;q=pirate
+</code></pre>
+
+<p>should yield a response like this:</p>
+<pre><code class="json">{
+  &quot;responseHeader&quot;: {
+    &quot;status&quot;: 0,
+    &quot;QTime&quot;: 182
+  },
+  &quot;response&quot;: {
+    &quot;numFound&quot;: 216,
+    &quot;start&quot;: 0,
+    &quot;docs&quot;: [
+      {
+        &quot;id&quot;: &quot;Volume_0282&quot;,
+        &quot;title&quot;: &quot;Spartacus, Or, The Roman Gladiator&quot;,
+      }
+    ]
+  },
+  &quot;highlighting&quot;: {
+    &quot;Volume_0282&quot;: {}
+  },
+  &quot;ocrHighlighting&quot;: {
+    &quot;Volume_0282&quot;: {
+      &quot;ocr_text&quot;: {
+        &quot;snippets&quot;: [
+          {
+            &quot;page&quot;: &quot;page_44&quot;,
+            &quot;text&quot;: &quot;Easy to have, impregnable to hold, An Island to be rul'd, and &quot;
+                    &quot;I to rule ![Enter a Gladiator, shouting towards &lt;em&gt;Pirates&lt;/em&gt;' &quot;
+                    &quot;quarter.]GLAD. Ho, there ! what ho ! the troops are on the move, &quot;
+                    &quot;My Chief! my Chief! the &lt;em&gt;Pirates&lt;/em&gt; steal away !&quot;,
+            &quot;score&quot;: 881062.75,
+            &quot;region&quot;: {
+              &quot;ulx&quot;: 194,
+              &quot;uly&quot;: 807,
+              &quot;lrx&quot;: 1196,
+              &quot;lry&quot;: 1008
+            },
+            &quot;highlights&quot;: [
+              [
+                {
+                  &quot;text&quot;: &quot;Pirates'&quot;,
+                  &quot;ulx&quot;: 694,
+                  &quot;uly&quot;: 82,
+                  &quot;lrx&quot;: 823,
+                  &quot;lry&quot;: 111
+                }
+              ],
+              [
+                {
+                  &quot;text&quot;: &quot;Pirates&quot;,
+                  &quot;ulx&quot;: 450,
+                  &quot;uly&quot;: 162,
+                  &quot;lrx&quot;: 563,
+                  &quot;lry&quot;: 190
+                }
+              ]
+            ]
+          }
+        ],
+        &quot;numTotal&quot;: 11
+      }
+    }
+  }
+}
+</code></pre>
+
+<p>As you can see, the <code>ocrHighlighting</code> component contains for every field in
+every matching document a list of snippets that match the query. The snippet
+contains the page the match occurred on, the matching text, the score of
+the passage and the coordinates of the region on the page image containing the
+passage text.</p>
+<p>Additionally, it also includes the region and text for every highlighting hit
+(i.e. the actual tokens that matched the query). Every hit in the document
+is an array of hit regions: If a given hit spans multiple lines, it is
+split into multiple regions, one for every line.</p>
+<p>Note that the hit region coordinates are by default <strong>relative to the containing
+region, not the page!</strong> (although this <a href="../queryparams/">can be changed</a>).</p>
+<p><code>numTotal</code> lists the total number of snippets that were found in this document
+for the given search query. You can control the number of snippets to be returned
+with the <code>hl.snippets</code> parameter (or <code>f.{fieldname}.hl.snippets</code> if you only want
+to set it for a given field). Snippets are sorted by their <code>score</code>.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../formats/" class="btn btn-neutral float-right" title="OCR Formats">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/dbmdz/solr-ocrhighlighting/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+      
+        <span style="margin-left: 15px"><a href="../formats/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+
+</body>
+</html>

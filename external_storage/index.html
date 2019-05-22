@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>External Storage - Solr OCR Highlighting Plugin</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "External Storage";
+    var mkdocs_page_input_path = "external_storage.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Solr OCR Highlighting Plugin</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../getting_started/">Getting Started</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../formats/">OCR Formats</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">External Storage</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#storing-ocr-outside-of-solr">Storing OCR outside of Solr</a></li>
+    
+
+    <li class="toctree-l2"><a href="#document-resolving">Document resolving</a></li>
+    
+
+    <li class="toctree-l2"><a href="#indexing-multiple-files-as-a-single-document">Indexing multiple files as a single document</a></li>
+    
+
+    <li class="toctree-l2"><a href="#ascii">Encoding: ASCII with XML-Escapes</a></li>
+    
+
+    <li class="toctree-l2"><a href="#utf8">Encoding: UTF-8</a></li>
+    
+
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../example/">Example Setup</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../queryparams/">Query Parameters</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../faq/">Frequently Asked Questions</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Solr OCR Highlighting Plugin</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>External Storage</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/dbmdz/solr-ocrhighlighting/edit/master/docs/external_storage.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p>In the setup described in the <a href="../getting_started/">Getting Started guide</a>, the OCR documents are
+directly stored in Solr. This does not require any special configuration besides setting <code>stored=true</code>
+on the fields in the schema.</p>
+<p>However, this approach has several drawbacks, that might not make it practical for your use case:</p>
+<ul>
+<li><strong>Index size:</strong> Raw OCR documents need to be stored in the Solr index, depending on the format
+  these regularly reach sizes  above 100MiB, which adds up really quickly with thousands of documents</li>
+<li><strong>Memory Usage:</strong> During highlighting, Solr will load the full contents of the stored field into memory.
+  Here again, the document sizes involved can make this problematic.</li>
+</ul>
+<h2 id="storing-ocr-outside-of-solr">Storing OCR outside of Solr</h2>
+<p>To work around the above issues, the plugin can also access OCR documents stored outside of Solr
+for highlighting. This works by lazily loading only the parts of the documents that actually
+need to be highlighted at query time from an external source like the file system.</p>
+<p>This works, since with an appropriately configured index, Solr stores the <em>character offsets</em> of
+the indexed terms in the input document in the index. Given these offsets, we can seek into
+the input document and retrieve just the parts that are needed.</p>
+<p>There is, however, one complication: Internally, Solr works with UTF-16 strings, where every
+character takes up exactly 2 bytes, which is also what the stored character offsets are based on.
+In a UTF-16 encoded document, given a character offset of <code>32</code>, you can obtain the character at this
+position by simply seeking into the input document at position <code>64</code> (two bytes per character) and
+reading the two bytes that make up the character</p>
+<p>This would easy, but almost nobody stores documents in UTF-16, since it is very space-inefficient.
+Most real-world documents will be stored in UTF-8, which is a <em>variable length encoding</em>, meaning
+that the number of bytes a character takes up depends on the character itself (e.g. <code>a</code> is one byte,
+while <code>ä</code> is two bytes). This makes it impossible to calculate the byte offset of a given character,
+given only the character offset.</p>
+<p>To get around this limitation, you have two options:</p>
+<ol>
+<li><a href="#ascii">Encode the input documents in ASCII</a> (= always one byte per character) and
+   format non-ASCII codepoints as XML character entities
+   (i.e. <code>ſ</code> becomes <code>&amp;#383;</code>)</li>
+<li><a href="#utf8">Leave the input documents in UTF-8</a> and store the byte offset for
+   every term in the Solr index</li>
+</ol>
+<p><strong>Option #1 is the recommended way</strong>: It only requires a slight modification to
+your input documents with no effects on other consumers and offer the best
+experience.</p>
+<h2 id="document-resolving">Document resolving</h2>
+<p>To enable accessing external documents during highlighting, you will have to configure
+a <code>FieldLoader</code> in the <code>&lt;searchComponent&gt;</code> section of your <code>solrconfig.xml</code>.
+For documents on the local filesystem, the loader to use is
+<code>org.mdz.search.solrocr.lucene.fieldloader.PathFieldLoader</code>.</p>
+<pre><code class="xml">&lt;searchComponent class=&quot;org.mdz.search.solrocr.solr.HighlightComponent&quot; name=&quot;highlight&quot;
+                 ocrFormat=&quot;org.mdz.search.solrocr.formats.alto.AltoFormat&quot;&gt;
+  &lt;lst name=&quot;ocrFields&quot;&gt;
+    &lt;str&gt;ocr_text&lt;/str&gt;
+  &lt;/lst&gt;
+  &lt;fieldLoader class=&quot;org.mdz.search.solrocr.lucene.fieldloader.PathFieldLoader&quot; encoding=&quot;ascii&quot;&gt;
+    &lt;lst name=&quot;externalFields&quot;&gt;
+      &lt;str name=&quot;ocr_text&quot;&gt;/google1000/{id}/hOCR.html&lt;/str&gt;
+    &lt;/lst&gt;
+  &lt;/fieldLoader&gt;
+&lt;/searchComponent&gt;
+</code></pre>
+
+<p>To tell the loader where to find the file for a given document, you have to provide it
+with the encoding of the files (<a href="#ascii"><code>ascii</code></a> or <a href="#utf8"><code>utf8</code></a>) and a mapping from the
+field name to a <strong>path pattern</strong>.</p>
+<p>The path pattern can include arbitrary field names enclosed in curly braces. During resolving,
+these will be replaced with the contents of the field for the current document. The OCR document
+will then be loaded from the path described by the resulting string. For example,
+given a document where the <code>id</code> field is set to <code>1337</code>, the pattern <code>/data/ocr/{id}_ocr.xml</code> would
+load the OCR document from <code>/data/ocr/1337_ocr.xml</code>. You can use any field that is defined in your
+schema inside of the pattern. You can also use a Python-like slicing syntax to only refer to
+parts of the field values (e.g. <code>{id[:10]}</code>, <code>{id[2:4]}</code>, <code>{id[:-5]}</code>).</p>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>When using external documents for highlighting, the performance depends almost exclusively on
+how fast the underlying storage is able to perform random I/O. This is why <strong>using flash storage
+for the documents is highly recommended</strong>.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If your use case requires more sophisticated resolving, or you want to load the document contents from
+sources other than the file system, the plugin provides an
+<a href="https://github.com/dbmdz/solr-ocrhighlighting/blob/master/src/main/java/org/mdz/search/solrocr/lucene/fieldloader/ExternalFieldLoader.java"><code>ExternalFieldLoader</code></a>
+interface that you can implement and just pass in the <code>class</code> parameter.</p>
+</div>
+<h2 id="indexing-multiple-files-as-a-single-document">Indexing multiple files as a single document</h2>
+<p>In some environments, OCR documents are stored with one file per page in the OCRed document. The plugin supports
+indexing these files <strong>as a single document</strong> if some pre-conditions are met:</p>
+<ul>
+<li>The lexicographical order of the file paths that make up the pages of a document is equal to the order of those pages
+  in the document</li>
+<li>The files are <strong>concatenated in the same order without any characters in between</strong> at indexing time</li>
+</ul>
+<p>If these conditions are met, add the <code>multiple="true"</code> option to your field loader configuration and a wildcard
+to your path patterns (e.g. <code>/local/ocr/{id}/*.xml</code>). At indexing time, instead of POSTing the contents of a single
+file in your document&rsquo;s OCR field, you submit the <strong>concatenated contents of all files</strong> (or, in the case of <a href="#utf8">UTF-8 documents</a>, the index for the concatenated contents).</p>
+<p>Refer to the <a href="https://github.com/dbmdz/solr-ocrhighlighting/blob/master/src/test/java/org/mdz/search/solrocr/solr/AltoMultiTest.java">unit test</a>
+to see an example setup for this use case.</p>
+<h2 id="ascii">Encoding: ASCII with XML-Escapes</h2>
+<p>To use ASCII-encoded documents, the only thing you have to do is pass <code>ascii</code> in the <code>encoding</code> parameter
+of your <code>fieldLoader</code> and make sure that they <strong>do not contain any unescaped UTF-8 codepoints</strong>.
+This can be done very effectively with this little Python snippet:</p>
+<pre><code class="python">utftext.encode('ascii', 'xmlcharrefreplace')
+</code></pre>
+
+<p>The repository also includes a <a href="https://github.com/dbmdz/solr-ocrhighlighting/raw/master/ascii_escape">script that you can use to do the conversion:</a></p>
+<pre><code class="sh">$ cat input.xml | ./ascii_escape &gt; output.xml
+
+#or:
+$ ./ascii_escape input.xml output.xml
+</code></pre>
+
+<h2 id="utf8">Encoding: UTF-8</h2>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>This approach comes with significant drawbacks:</p>
+<ul>
+<li><strong>You cannot use the modern highlighting approach</strong> (<code>hl.weightMatches=true</code>, default in Solr &gt;=8)</li>
+<li>Your index will be <strong>significantly larger</strong> than with the ASCII-approach.</li>
+</ul>
+</div>
+<p>In order for the plugin to know which parts of the input files to read during highlighting, you need to
+tell it the <em>byte offset</em> for every token in the input document. Solr will then store this offset in the
+<em>term payloads</em> and the plugin will load it from there using highlighting.</p>
+<p>This approach won&rsquo;t allow directly indexing the OCR documents, you will have to convert them to a special
+format that includes the byte offset for every token, e.g.
+<code>Dieſe⚑5107923 leuchtenden⚑5108028 treuherzigen⚑5108138 blauen⚑5108250 Augen,⚑5108357</code>.</p>
+<p>The <code>⚑</code> character is the default delimiter that separates the term from its offset, but you can pick your
+own value with the included tool and the <code>delimiter</code> attribute in the configuration below.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This format will only be used for indexing, you don&rsquo;t need to store it on disk. For highlighting,
+your unmodified OCR documents will be used.</p>
+</div>
+<p>You don&rsquo;t have to do this by yourself, we provide a Java implementation for every supported format
+(<a href="https://github.com/dbmdz/solr-ocrhighlighting/blob/master/src/main/java/org/mdz/search/solrocr/formats/hocr/HocrByteOffsetsParser.java">hOCR</a>,
+<a href="https://github.com/dbmdz/solr-ocrhighlighting/blob/master/src/main/java/org/mdz/search/solrocr/formats/alto/AltoByteOffsetsParser.java">ALTO</a>
+and <a href="https://github.com/dbmdz/solr-ocrhighlighting/blob/master/src/main/java/org/mdz/search/solrocr/formats/mini/MiniOcrByteOffsetsParser.java">MiniOCR</a>)
+as well as a cross-platform command-line tool (available on the
+<a href="https://github.com/dbmdz/solr-ocrhighlighting/releases">GitHub releases page</a>):</p>
+<pre><code class="sh"># The tool works transparently with all supported formats
+./offsets-parser ../example/google1000/Volume_0000.hocr &gt; out.txt
+
+#or, for multiple files that should be indexed as one document:
+$ cat page1.xml page2.xml | ./offsets-parser &gt; out.txt
+</code></pre>
+
+<p>In your schema, you will have to enable term positions, term vectors and term payloads.
+In your indexing analyzer chain, you need to remove the <code>HTMLStripCharFilterFactory</code>
+(and the <code>AltoCharFilterFactory</code> if using ALTO) and instead tell Solr to
+tokenize on whitespace, split off those offsets during indexing and store them as payloads.</p>
+<pre><code class="xml">&lt;!-- Positions, Term Vectors and Term Payloads are mandatory with this approach. --&gt;
+&lt;fieldtype name=&quot;text_ocr&quot; class=&quot;solr.TextField&quot; termPositions=&quot;true&quot; termVectors=&quot;true&quot; termPayloads=&quot;true&quot;&gt;
+  &lt;analyzer&gt;
+    &lt;!-- Mandatory, the input is a whitespace-separated sequence of {term}{delimiter}{offset} units and has to be
+         split on whitespace --&gt;
+    &lt;tokenizer class=&quot;solr.WhitespaceTokenizerFactory&quot;/&gt;
+    &lt;!-- The delimiter can be any UTF-16 codepoint, &quot;⚑&quot; is used by default in the provided Java implementation and CLI tool --&gt;
+    &lt;filter class=&quot;solr.DelimitedPayloadTokenFilterFactory&quot; delimiter=&quot;⚑&quot;
+            encoder=&quot;org.mdz.search.solrocr.lucene.byteoffset.ByteOffsetEncoder&quot; /&gt;
+    &lt;!-- The WhitespaceTokenizer is really rudimentary. This filter will trim non-letter from the beginning/end,
+         making the terms more similar to what you'd get with the StandardTokenizer. --&gt;
+   &lt;filter class=&quot;org.mdz.search.solrocr.lucene.NonAlphaTrimFilterFactory&quot; /&gt;
+    &lt;!-- rest of your analyzer chain --&gt;
+    &lt;!-- ..... --&gt;
+  &lt;/analyzer&gt;
+&lt;/fieldtype&gt;
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../example/" class="btn btn-neutral float-right" title="Example Setup">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../formats/" class="btn btn-neutral" title="OCR Formats"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/dbmdz/solr-ocrhighlighting/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../formats/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../example/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+
+</body>
+</html>

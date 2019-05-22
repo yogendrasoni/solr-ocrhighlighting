@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="None">
+  
+  <link rel="shortcut icon" href="img/favicon.ico">
+  <title>Solr OCR Highlighting - Solr OCR Highlighting Plugin</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Solr OCR Highlighting";
+    var mkdocs_page_input_path = "index.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="js/jquery-2.1.1.min.js" defer></script>
+  <script src="js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="." class="icon icon-home"> Solr OCR Highlighting Plugin</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="getting_started/">Getting Started</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="formats/">OCR Formats</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="external_storage/">External Storage</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="example/">Example Setup</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="queryparams/">Query Parameters</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="faq/">Frequently Asked Questions</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href=".">Solr OCR Highlighting Plugin</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Solr OCR Highlighting</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/dbmdz/solr-ocrhighlighting/edit/master/docs/index.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="solr-ocr-highlighting">Solr OCR Highlighting</h1>
+<p><img alt="Highlighted OCR snippet" src="img/snippet.png" /></p>
+<p>This Solr plugin lets you put word-level OCR text into one or more of you documents&rsquo;
+fields and then allows you to obtain structured highlighting data with the text
+and its position on the page at query time:</p>
+<pre><code class="json">{
+  &quot;page&quot;: &quot;page_380&quot;,
+  &quot;text&quot;: &quot;to those parts, subject to unreasonable claims from the pro­prietor &quot;
+          &quot;of Maryland, until the year 17C2, when the whole controversy was &quot;
+          &quot;settled by Charles &lt;em&gt;Mason&lt;/em&gt; and Jeremiah &lt;em&gt;Dixon&lt;/em&gt;, upon &quot;
+          &quot;their return from an observation of the tran­sit of Venus, at the &quot;
+          &quot;Cape of Good Hope, where they&quot;,
+  &quot;score&quot;: 11110209,
+  &quot;region&quot;: { &quot;ulx&quot;: 196, &quot;uly&quot;: 1703, &quot;lrx&quot;: 1232, &quot;lry&quot;: 1968 },
+  &quot;highlights&quot;: [
+    [{ &quot;text&quot;: &quot;Mason&quot;,  &quot;ulx&quot;: 675, &quot;uly&quot;: 110, &quot;lrx&quot;: 783, &quot;lry&quot;: 141 }],
+    [{ &quot;text&quot;: &quot;Dixon,&quot;, &quot;ulx&quot;: 1,   &quot;uly&quot;: 167, &quot;lrx&quot;: 119, &quot;lry&quot;: 204 }]
+  ]
+}
+</code></pre>
+
+<p>All this can optionally be done without having to store any OCR text in the
+index itself: The plugin can lazy-load only the parts required for highlighting
+at query time from your original OCR input documents. </p>
+<p>It works by extending Solr&rsquo;s standard <code>UnifiedHighlighter</code> with support for
+loading external field values and determining OCR positions from those field
+values. This means that all options and query types supported by the
+<code>UnifiedHighlighter</code> are also supported for OCR highlighting. The plugin also
+works transparently with non-OCR fields and just lets the default
+implementation handle those.</p>
+<p>The plugin <strong>works with all Solr versions &gt;= 7.x</strong> (tested with 7.6, 7.7 and 8.0).</p>
+<h2 id="features">Features</h2>
+<ul>
+<li>Index various OCR formats without little to no preprocessing<ul>
+<li><a href="formats/#hocr">hOCR</a></li>
+<li><a href="formats/#alto">ALTO</a></li>
+<li><a href="formats/#miniocr">MiniOCR</a></li>
+</ul>
+</li>
+<li>Retrieve all the information needed to render a highlighted snippet view
+  directly from Solr, without postprocessing</li>
+<li>Keeps your index size manageable by re-using OCR documents on disk for
+  highlighting</li>
+</ul>
+<h2 id="getting-started">Getting Started</h2>
+<p>To get started, refer to the <a href="getting_started/">Getting Started documentation</a>.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/dbmdz/solr-ocrhighlighting/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+      
+    </span>
+</div>
+    <script>var base_url = '.';</script>
+    <script src="js/theme.js" defer></script>
+      <script src="search/main.js" defer></script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.0.4
+Build Date UTC : 2019-05-22 17:46:33
+-->
